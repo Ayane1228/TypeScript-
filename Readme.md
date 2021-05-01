@@ -600,7 +600,9 @@ console.log(max);
 
 ## 函数
 
-函数的使用分为两步
+函数：声明一次但却可以调用任意多次的一段代码。
+
+函数的使用分为两步：	
 
 1. 声明函数
 2. 调用函数
@@ -694,6 +696,8 @@ function sum():number {
 
 ### 返回值的使用
 
+可以通过两种方式接收返回值。
+
 1. 使用变量接收函数返回值
 
    ```typescript
@@ -706,5 +710,142 @@ function sum():number {
    console.log(10 * 函数名() )
    ```
 
-   
+
+### 函数demo
+
+计算三角形面积
+
+> 公式： 1/2 * 高 * 底
+
+```typescript
+function triangularArea(height,bottom):number{
+    return 0.5*(height * bottom)
+}
+
+console.log(triangularArea(5,10));
+```
+
+比较两个数中较大的值
+
+```typescript
+function getMax( num1, num2 ):number {
+    return num1 > num2 ? num1 : num2
+}
+console.log(getMax(1,2));
+```
+
+> return其他说明
+>
+> 1. `return`可以将函数内部的计算结果返回。
+> 2. 终止函数代码执行，即：`return`后面的代码不会执行。
+> 3. `return`只能在函数中使用。
+> 4. `return`可以单独使用（后面不跟内容），用来刻意终止函数执行。
+
+# 第五天
+
+## 变量作用域
+
+变量作用域：代码中定义变量的区域，它决定了变量的使用范围。
+
+在TS(JS)中，函数可以形成作用域，叫做：函数作用域。
+
+根据函数作用域范围的不同，变量可以分为两种：1.局部变量 2.全局变量
+
+局部变量：表示在函数内部声明的变量，该变量只能在函数内部使用。
+
+```typescript
+function fn() {
+	// 变量 num 是局部变量
+    let num:number = 1
+    // 这里能访问到变量num
+	console.log(num)
+}
+fn()
+// 这里不能访问到局部变量
+console.log(num)
+```
+
+全局变量：在函数外部声明的变量，该变量在当前ts文件的任何地方都可以使用。
+
+```typescript
+// 变量 num 是全局变量
+let num:number
+function fn() {
+    num = 1
+    // 这里能访问到变量num
+	console.log(num)
+}
+fn()
+// 这里能访问到全局变量
+console.log(num)
+```
+
+## 对象
+
+对象：一组相关属性和方法的集合，并且是无序的。
+
+在TS中，如果要描述一个事物或一组相关数据，就可以用对象来实现。
+
+创建对象语法
+
+```typescript
+let person = {}
+```
+
+此处的 { }表示对象，这个对象没有属性或方法，这个对象就是一个空对象。
+
+对象中的属性或方法，采用的是 键值对的形式。键、值之间使用冒号 ： 来配对。
+
+```typescript
+let person = {
+	key1：value1,
+	key2: value2
+}
+```
+
+属性和方法的区别：值是不是函数。如果是，就称为方法；否则，就是普通属性。
+
+```typescript
+let person  = {
+	name:'男孩',
+	say:function(){
+		console.log('唱歌')
+	}
+}
+```
+
+
+
+> 函数作为方法时，可以省略function后面的函数名称，也叫做匿名函数。
+
+## 接口
+
+### 对象的类型注解
+
+TS中的对象是结构化的，结构简单来说就是对象有什么属性或方法。
+
+在使用对象前，就可以根据需求，提前设计好对象的结构。
+
+对象的类型注解是为了约束对象的结构。
+
+对象的类型注解的语法**类似**对象设置属性的语法。
+
+> 键值对中的值是类型	
+>
+> 多个键值对之间用 ； 隔开，并且分号可以省略
+
+```typescript
+// 此处的{}表示类型注解
+let person:{
+	name:string;
+	age:number
+}
+// 此处的{}表示TS中的具体的对象值
+person = {
+	name:'张三',
+	age:18
+}
+```
+
+
 
