@@ -983,3 +983,503 @@ let img = querySelector('#image') as HTMLImageElement
 ```
 
 > 我们可以通过`console.dir()`获取从它的原型`_proto_`获取到元素的具体类型。
+
+> 使用函数声明的形式时：使用事件对象参数时，应该指定类型注解**`event:MouseEvent`**，否则，访问事件对象的属性时没有任何提示。
+
+```typescript
+// 获取当前触发点击事件的dom元素 
+btn.addEventListener('click',handleClick)
+function handleClick(event:MouseEvent){
+	console.log(event.target)
+}
+```
+
+# 井字棋
+
+## 模板
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>井字棋</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>井字棋</h1>
+
+    <div class="container">
+      <!-- 游戏面板（棋盘） -->
+      <div id="bord" class="game-board x">
+        <div class="row">
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+        <div class="row">
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+        <div class="row">
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+      </div>
+
+      <!-- 游戏获胜信息面板 -->
+      <div id="message" class="game-message">
+        <p id="winner">X 赢了！</p>
+        <button id="restart">重新开始</button>
+      </div>
+    </div>
+  </body>
+</html>
+
+```
+
+```css
+p {
+  margin: 0;
+}
+
+body {
+  background-color: #f9f2e7;
+}
+
+/* 标题 */
+h1 {
+  text-align: center;
+  font-size: 60px;
+  color: #477998;
+}
+
+/* 游戏内容容器 */
+.container {
+  position: relative;
+  width: 471px;
+  height: 471px;
+  margin: 0 auto;
+}
+
+/* 游戏获胜信息面板 */
+.game-message {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(69, 133, 136, 0.4);
+  text-align: center;
+}
+
+/* winner 获胜者 */
+.game-message p {
+  margin: 180px 0 40px 0;
+  color: #fff;
+  font-size: 50px;
+}
+
+/* 重新开始游戏按钮 */
+.game-message button {
+  color: #517304;
+  border-color: #517304;
+  width: 110px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* 游戏面板棋盘 */
+.game-board {
+  width: 471px;
+  height: 471px;
+}
+
+.game-board.x .cell:not(.x):not(.o):hover::before {
+  content: 'X';
+  color: lightgray;
+}
+.game-board.o .cell:not(.x):not(.o):hover::before {
+  content: 'O';
+  color: lightgray;
+}
+
+/* 棋盘 - 行 */
+.row {
+  display: flex;
+}
+.row:last-child .cell {
+  border-bottom: 0;
+}
+
+/* 棋盘 - 单元格 */
+.cell {
+  flex: 1;
+  box-sizing: border-box;
+  width: 157px;
+  height: 157px;
+  line-height: 157px;
+  border-right: 6px solid #546363;
+  border-bottom: 6px solid #546363;
+  text-align: center;
+  cursor: pointer;
+  font-size: 88px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+}
+.cell:last-child {
+  border-right: 0;
+}
+
+/* x 玩家 */
+.cell.x::before {
+  content: 'X';
+  color: #01a8c6;
+}
+/* o 玩家 */
+.cell.o::before {
+  content: 'O';
+  color: #8fbe01;
+}
+
+```
+
+## 单元格点击	
+
+点击棋盘中的任意单元格，单元格默认显示x
+
+- 获取所有单元格元素
+- 给每一个单元格添加点击事件
+- 给当前被点击的单元格添加类名x
+
+```ts
+/**
+ * 获取所有单元格元素
+ * 给每一个单元格添加点击事件
+ * 给当前被点击的单元格添加类名x 
+ */
+const cells = document.querySelectorAll('.cell')
+cells.forEach( (item) => {
+    // 类型断言
+    let cell = item as HTMLDivElement
+    // 绑定事件
+    cell.addEventListener('click',(e) => {
+        // 类型断言
+        let target = e.target as HTMLDivElement
+        target.classList.add('x') 
+    })
+})
+```
+
+> 优化：防止重复点击：给事件添加`once`属性。
+>
+> 将函数提取出来。
+>
+> ```ts
+> /**
+>  * 获取所有单元格元素
+>  * 给每一个单元格添加点击事件
+>  * 给当前被点击的单元格添加类名x 
+>  */
+> const cells = document.querySelectorAll('.cell')
+> cells.forEach( (item) => {
+>     // 类型断言
+>     let cell = item as HTMLDivElement
+>     // 绑定事件
+>     cell.addEventListener('click',clickCell,{ once:true } 
+> })  
+> 
+> // 棋盘单元格点击事件，函数声明时要指定类型注解
+> function clickCell(e:MouseEvent){
+>     let target = e.target as HTMLDivElement
+>     target.classList.add('x') 
+> }
+> ```
+
+## 切换玩家
+
+不能将类名写死。这里要让添加的类名不固定。
+
+可以用一个flag值，表示当前要添加的类名是'X'还是'O'。
+
+- 创建一个存储当前玩家的变量（currentPlayer），默认值为O
+- 给添加给单元格写死的类名x，替换为currentPlayer
+- 点击后currentPlayer切换为另外一个玩家
+- 修改`game-board`的类名（借此修改鼠标移上去去时单元格添加的伪类）与currentPlayer一致
+
+```ts
+// 获取所有单元格
+const cells = document.querySelectorAll('.cell')
+// 获取鼠标移上去时的元素
+const gameBord = document.querySelector('.game-board')
+
+// 遍历单元格元素添加点击方法
+cells.forEach( (item) => {
+    // 类型断言
+    let cell = item as HTMLDivElement
+    // 绑定事件(只能触发一次)
+    cell.addEventListener('click',clickCell,{ once:true })
+})  
+
+let currentPlayer:string = 'x'
+
+// 棋盘单元格点击事件
+function clickCell(e:MouseEvent){
+    let target = e.target as HTMLDivElement
+    // 给点击的单元格添加当前玩家的样式，点击后切换玩家
+    target.classList.add(currentPlayer) 
+    // 切换玩家
+    // 修改当前玩家
+    currentPlayer = currentPlayer ==='x' ? 'o' : 'x'
+    // 移除类名、重置为当前玩家（鼠标移到棋盘上的伪类重置为当前玩家）
+    gameBord.classList.remove('x','o')
+    gameBord.classList.add(currentPlayer)
+}
+
+```
+
+## 枚举
+
+由于`string`取值宽泛，无法约束其他写错的取值（如 X O 0）。这里可以使用枚举：
+
+枚举：变量的值只能是几个固定值中的一个。是用来组织关联数据的一种方式。
+
+JS中是没有枚举的，TS中新增了这一功能。
+
+创建语法：
+
+```typescript
+enum 枚举名称 { 成员1，成员2 ....}
+```
+
+```typescript
+enum Player { X,O }
+```
+
+> 我们约定枚举名称和成员名称都以大写字母开头。
+>
+> 多个成员之间用 ， 隔开。
+>
+> 枚举中的成员不是键值对。
+
+使用枚举：在声明变量中的类型注解中使用，变量赋值时使用 `. 获取枚举中的规定的值
+
+```typescript
+enum Gender { Femle,Male }
+let userGender：Gender
+userGender = Gender.Femle
+```
+
+> 枚举成员是只读的。只能访问，不能修改。
+
+数字枚举：当枚举中的成员没有赋初始值时，他们的值是从0开始自增的。
+
+```typescript
+enum Gender { Femle,Male }
+let userGender:Gender = Gender.Femle
+console.log(userGender) // 0
+userGender = Gender.Male
+console.log(userGender) // 1
+```
+
+字符串枚举：枚举成员的值为字符串。使用字符串枚举时，每个成员都必须有初始值。
+
+```typescript
+enum Gender { 
+    Femle = '女',
+    Male = '男' 
+}
+let userGender:Gender = Gender.Femle
+console.log(userGender) // 女
+userGender = Gender.Male
+console.log(userGender) // 男
+```
+
+## 使用枚举案例
+
+- 创建字符串枚举（Player）,提供X和O两个成员。
+
+- 将成员X的值设置为’x‘；将成员O的值设置为’O‘。
+
+- 将变量currentPlayer的类型设置为Player枚举类型，默认为Player.X。
+
+- 将所有的x和o用枚举成员替代。
+
+- ```typescript
+  // 获取所有单元格
+  const cells = document.querySelectorAll('.cell')
+  // 获取鼠标移上去时的元素
+  const gameBord = document.querySelector('.game-board')
+  
+  //创建枚举
+  enum Player {
+      X = 'x',
+      O = 'o'
+  }
+  // 遍历单元格元素添加点击方法
+  cells.forEach( (item) => {
+      // 类型断言
+      let cell = item as HTMLDivElement
+      // 绑定事件(只能触发一次)
+      cell.addEventListener('click',clickCell,{ once:true } )
+  })  
+  
+  let currentPlayer:Player = Player.X
+  
+  // 棋盘单元格点击事件
+  function clickCell(e:MouseEvent){
+      let target = e.target as HTMLDivElement
+      // 给点击的单元格添加当前玩家的样式，点击后切换玩家
+      target.classList.add(currentPlayer) 
+      // 切换玩家
+      // 修改当前玩家
+      currentPlayer = currentPlayer === Player.X ? Player.O : Player.X
+      // 移除类名、重置为当前玩家（鼠标移到棋盘上的伪类重置为当前玩家）
+      gameBord.classList.remove(Player.X, Player.O)
+      gameBord.classList.add(currentPlayer)
+  }
+  
+  ```
+
+  ## 游戏结果判断
+
+  通过每个单元格元素的索引来判断游戏结果。
+
+  |  0   |  1   |  2   |
+  | :--: | :--: | :--: |
+  |  3   |  4   |  5   |
+  |  6   |  7   |  8   |
+
+  获胜的结果
+
+  - [0,1,2]
+  - [3,4,5]
+  - [6,7,8]
+  - [0,3,6]
+  - [1,4,7]
+  - [2,5,8]
+  - [0,4,8]
+  - [2,4,6]
+
+  将这些成功内容保存到一个大数组中。点击后进行判断。
+
+  判断过程：遍历这个大数组，分别判断每一种情况对应的三个单元格元素，是否都是相同的X或O类名。只要存在一个满足，就成功了。
+
+  ### 判赢函数封装
+
+  参数：当前玩家
+
+  返回值：布尔值
+
+  思路：遍历判赢数组，分别判断每种情况对应的三个单元格元素，是否同时包含当前玩家的类名。
+
+  - 使用`some()`方法遍历数组，将`some`方法的返回值作为判赢函数的返回值结果。
+  - 在`some`方法的回调函数中，获取到每种获胜情况对应的三个单元格元素。
+  - 判断这三个单元格元素是否**同时包含**当前玩家的类名。
+  - 如果包含，说明当前玩家赢了，返回true。否则返回false，继续循环。
+
+  ```typescript
+  // 判赢数组
+  let winArr = [
+      [0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]
+  ]
+  /**
+  - 使用some()方法遍历数组，将some方法的返回值作为判赢函数的返回值结果。
+  - 在some方法的回调函数中，获取到每种获胜情况对应的三个单元格元素。
+  - 判断这三个单元格元素是否同时包含当前玩家的类名。
+  - 如果包含，说明当前玩家赢了，返回true。否则返回false，继续循环。
+   * @param player 
+   * @returns 
+   */
+  // 判赢hanshu
+  function checkWin(player:Player){
+      return winArr.some( (item) => {
+          // 在some方法的回调函数中，获取到每种获胜情况对应的三个单元格元素。
+          // 先获取到每种获胜情况的索引
+          // 通过这三个索引从cells中获取到单元格元素
+          let cellIndex0 = item[0]
+          let cellIndex1 = item[1]
+          let cellIndex2 = item[2]
+          // 判断是否包含当前玩家的类名
+          if( hasClass(cells[cellIndex0],player) && hasClass(cells[cellIndex1],player) && hasClass(cells[cellIndex2],player)) {
+              return true
+          } else {
+              return false
+          }
+          
+      })
+  }
+  
+  // 封装元素是否包含类名
+  function hasClass(el:Element, name:string){
+      return  el.classList.contains(name)
+  }
+  ```
+
+  ### 判断平局
+
+  创建变量（步数steps），如果step等于9，就为平局。
+
+   
+
+  ## 显示结果
+
+  获取相关元素 `#message` 和 `#winner`
+
+  ```typescript
+  // 获取获胜信息相关元素
+  const message = document.querySelector('#message') as HTMLDivElement
+  const winner = document.querySelector('#winner') as HTMLDivElement
+  ```
+  
+  修改dispaly属性
+  
+  展示获胜信息
+  
+  ```js
+  message.style.display = 'block'
+  winner.innerText = currentPlayer + '  赢了！'
+  return
+  ```
+  
+  ### 重新开始游戏
+  
+  获取元素
+  
+  ```typescript
+  // 重新开始游戏
+  const restart = document.querySelector('#restart') as HTMLButtonElement
+  ```
+  
+  添加点击事件
+  
+  - 隐藏获胜信息
+  - 重置棋盘
+  - 重置当前玩家
+  - 重置所有单元格
+  - 重置步数
+  - 重新绑定事件
+  
+  ```typescript
+  // 点击重新开始事件
+  restart.addEventListener('click',function(){
+      // 隐藏获胜信息
+      message.style.display = 'none'
+      // 重置棋盘
+      currentPlayer = Player.X
+      cells.forEach( (item) => {
+          item.classList.remove(Player.X,Player.O)
+      })
+      // 重置步数
+      step = 0
+      // 
+  })
+  ```
+  
+  
+
